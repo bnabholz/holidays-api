@@ -67,7 +67,18 @@ function ParseFed(html){
 
   }
 
-  const sortedHolidays = holidays.slice().sort((a,b) => {
+  let existing = [];
+  try {
+    const raw = fs.readFileSync('public/holiday-data.json', 'utf8');
+    existing = JSON.parse(raw).holidays || [];
+  } catch (e) {
+    // file doesn't exist or is invalid, start fresh
+  }
+
+  const existingKeys = new Set(existing.map(h => `${h.name}|${h.prettyDate}`));
+  const merged = existing.concat(holidays.filter(h => !existingKeys.has(`${h.name}|${h.prettyDate}`)));
+
+  const sortedHolidays = merged.slice().sort((a,b) => {
     return new Date(a.prettyDate) - new Date(b.prettyDate);
   })
 
